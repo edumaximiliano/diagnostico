@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico de Gestão da Qualidade</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --ink: #0d1117;
+    --paper: #f8f5ef;
+    --cream: #efe9de;
+    --gold: #c8963e;
+    --gold-light: #e8b96a;
+    --rust: #b54a2f;
+    --sage: #3d6b5e;
+    --sage-light: #5a9080;
+    --muted: #7a6f62;
+    --border: #d4c9b8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Seções ocultas por padrão — controladas pelo JS */
+  #company-form, #quiz, #report { display: none; }
+
+  /* ─── LANDING ─── */
+  #landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+    background: var(--ink);
+    overflow: hidden;
+  }
+
+  #landing::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 40% at 80% 20%, rgba(200,150,62,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 10% 80%, rgba(61,107,94,0.2) 0%, transparent 70%);
+  }
+
+  .landing-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(200,150,62,0.15);
+    border: 1px solid rgba(200,150,62,0.4);
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 2px;
+    margin-bottom: 28px;
+  }
+
+  .landing-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 7vw, 64px);
+    font-weight: 900;
+    color: var(--paper);
+    line-height: 1.05;
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .landing-title span { color: var(--gold); }
+
+  .landing-subtitle {
+    color: rgba(248,245,239,0.55);
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .qr-wrapper {
+    background: white;
+    padding: 24px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 20px;
+    box-shadow: 0 0 0 8px rgba(200,150,62,0.12), 0 0 0 16px rgba(200,150,62,0.05);
+  }
+
+  #qrcode canvas, #qrcode img { display: block; }
+
+  .qr-label {
+    color: rgba(248,245,239,0.4);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  .start-btn {
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    padding: 16px 48px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.25s;
+    text-transform: uppercase;
+  }
+
+  .start-btn:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(200,150,62,0.35);
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 40px;
+    margin-top: 56px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+  }
+  .stat-lbl {
+    font-size: 11px;
+    color: rgba(248,245,239,0.4);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ─── URL CONFIG PANEL ─── */
+  .config-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(200,150,62,0.3);
+    border-radius: 6px;
+    padding: 28px 24px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .config-icon { font-size: 32px; margin-bottom: 12px; }
+
+  .config-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--paper);
+    margin-bottom: 10px;
+  }
+
+  .config-desc {
+    font-size: 13px;
+    color: rgba(248,245,239,0.55);
+    line-height: 1.65;
+    margin-bottom: 20px;
+  }
+
+  .config-input-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .config-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1.5px solid rgba(200,150,62,0.4);
+    border-radius: 3px;
+    background: rgba(255,255,255,0.08);
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 0;
+  }
+
+  .config-input::placeholder { color: rgba(248,245,239,0.3); }
+  .config-input:focus { border-color: var(--gold); }
+
+  .config-save-btn {
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    padding: 12px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+
+  .config-save-btn:hover { background: var(--gold-light); }
+
+  .config-hint {
+    font-size: 12px;
+    color: rgba(248,245,239,0.3);
+    margin-top: 14px;
+  }
+
+  /* URL status bar */
+  .url-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4caf7d;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(76,175,125,0.25);
+  }
+
+  .url-display-text {
+    font-size: 12px;
+    color: rgba(248,245,239,0.5);
+    font-family: monospace;
+    word-break: break-all;
+    max-width: 280px;
+  }
+
+  .url-reset-btn {
+    background: none;
+    border: 1px solid rgba(248,245,239,0.2);
+    color: rgba(248,245,239,0.4);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .url-reset-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* ─── PUBLISH GUIDE ─── */
+  .publish-guide {
+    margin-top: 48px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 28px 24px;
+    text-align: left;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .publish-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(248,245,239,0.6);
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .publish-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .pub-step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-size: 13px;
+    color: rgba(248,245,239,0.55);
+    line-height: 1.55;
+  }
+
+  .pub-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(200,150,62,0.2);
+    border: 1px solid rgba(200,150,62,0.4);
+    color: var(--gold);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .pub-step strong { color: rgba(248,245,239,0.8); }
+  .pub-step code {
+    background: rgba(255,255,255,0.08);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--gold-light);
+  }
+
+  .pub-link {
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(200,150,62,0.4);
+  }
+
+  .pub-link:hover { border-bottom-color: var(--gold); }
+
+  /* ─── QUIZ ─── */
+  #quiz {
+    display: none;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .quiz-header {
+    background: var(--ink);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .quiz-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--paper);
+    font-weight: 700;
+  }
+  .quiz-logo span { color: var(--gold); }
+
+  .progress-wrap {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 40px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .progress-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(248,245,239,0.45);
+  }
+
+  .progress-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold);
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: rgba(248,245,239,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .section-tag {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .quiz-body {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  .question-block {
+    animation: fadeSlide 0.45s ease forwards;
+  }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-section {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .q-section::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 2px;
+    background: var(--gold);
+  }
+
+  .q-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: var(--cream);
+    line-height: 1;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .q-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 40px;
+  }
+
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option-btn {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 24px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index: 0;
+  }
+
+  .option-btn:hover::before { transform: scaleX(0.04); }
+
+  .option-btn:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 20px rgba(200,150,62,0.12);
+    transform: translateX(4px);
+  }
+
+  .option-btn.selected {
+    border-color: var(--sage);
+    background: rgba(61,107,94,0.06);
+  }
+
+  .option-btn.selected .opt-letter {
+    background: var(--sage);
+    color: white;
+    border-color: var(--sage);
+  }
+
+  .opt-letter {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    position: relative;
+    z-index: 1;
+    color: var(--muted);
+  }
+
+  .opt-text {
+    position: relative;
+    z-index: 1;
+    line-height: 1.45;
+  }
+
+  .opt-score {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    position: relative;
+    z-index: 1;
+    opacity: 0.5;
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 48px;
+  }
+
+  .nav-back {
+    background: none;
+    border: 2px solid var(--border);
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 2px;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .nav-back:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  .nav-next {
+    background: var(--ink);
+    border: none;
+    padding: 14px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 2px;
+    color: var(--paper);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .nav-next.active {
+    opacity: 1;
+    pointer-events: all;
+    background: var(--sage);
+  }
+
+  .nav-next.active:hover {
+    background: var(--sage-light);
+    transform: translateX(4px);
+  }
+
+  /* ─── COMPANY FORM ─── */
+  #company-form {
+    display: none;
+    min-height: 100vh;
+    background: var(--cream);
+    padding: 60px 24px;
+  }
+
+  .form-inner {
+    max-width: 580px;
+    margin: 0 auto;
+  }
+
+  .form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+
+  .form-sub {
+    color: var(--muted);
+    margin-bottom: 48px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .field-group {
+    margin-bottom: 28px;
+  }
+
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .field-input, .field-select {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--border);
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: white;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  .field-input:focus, .field-select:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  .form-submit {
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    margin-top: 16px;
+    transition: all 0.2s;
+  }
+
+  .form-submit:hover {
+    background: var(--sage);
+  }
+
+  /* ─── REPORT ─── */
+  #report {
+    display: none;
+    background: var(--paper);
+    min-height: 100vh;
+  }
+
+  .report-cover {
+    background: var(--ink);
+    padding: 80px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .report-cover::after {
+    content: 'DIAGNÓSTICO';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: 120px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.03);
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: -0.05em;
+  }
+
+  .report-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--ink);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 6px 20px;
+    border-radius: 1px;
+    margin-bottom: 32px;
+  }
+
+  .report-company-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 900;
+    color: var(--paper);
+    margin-bottom: 12px;
+  }
+
+  .report-date {
+    color: rgba(248,245,239,0.4);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    margin-bottom: 60px;
+  }
+
+  .score-ring-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 48px;
+  }
+
+  .score-ring {
+    width: 180px;
+    height: 180px;
+    position: relative;
+  }
+
+  .score-ring svg {
+    width: 180px;
+    height: 180px;
+    transform: rotate(-90deg);
+  }
+
+  .score-ring-track {
+    fill: none;
+    stroke: rgba(255,255,255,0.08);
+    stroke-width: 12;
+  }
+
+  .score-ring-fill {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 502;
+    stroke-dashoffset: 502;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1) 0.3s;
+  }
+
+  .score-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--paper);
+    line-height: 1;
+  }
+
+  .score-pct { font-size: 18px; color: var(--gold); }
+
+  .score-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(248,245,239,0.4);
+    margin-top: 4px;
+  }
+
+  .maturity-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  .maturity-desc {
+    color: rgba(248,245,239,0.5);
+    font-size: 13px;
+    max-width: 360px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .report-body {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    margin-top: 60px;
+  }
+
+  .section-header:first-child { margin-top: 0; }
+
+  .section-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .section-title-h {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .section-title-sub {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* Dimension bars */
+  .dim-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  .dim-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .dim-name {
+    min-width: 200px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+
+  .dim-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--cream);
+    border-radius: 4px;
+    overflow: hidden;
+    min-width: 100px;
+  }
+
+  .dim-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1) 0.5s;
+    width: 0%;
+  }
+
+  .dim-score {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    min-width: 44px;
+    text-align: right;
+  }
+
+  .dim-grade {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  /* Finding cards */
+  .findings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  .finding-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .finding-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .finding-card.strength::before { background: var(--sage); }
+  .finding-card.weakness::before { background: var(--rust); }
+  .finding-card.opportunity::before { background: var(--gold); }
+
+  .finding-type {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .finding-card.strength .finding-type { color: var(--sage); }
+  .finding-card.weakness .finding-type { color: var(--rust); }
+  .finding-card.opportunity .finding-type { color: var(--gold); }
+
+  .finding-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .finding-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* Recommendations */
+  .rec-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .rec-item {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .rec-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--cream);
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 40px;
+  }
+
+  .rec-content { flex: 1; }
+
+  .rec-priority {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .priority-alta { color: var(--rust); }
+  .priority-media { color: var(--gold); }
+  .priority-baixa { color: var(--sage); }
+
+  .rec-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .rec-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Radar chart */
+  .radar-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 32px 0 48px;
+  }
+
+  .radar-wrap svg { max-width: 360px; width: 100%; }
+
+  /* Print / share */
+  .report-actions {
+    text-align: center;
+    padding: 48px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 2px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .action-btn.primary {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+  }
+
+  .action-btn.primary:hover { background: var(--sage); }
+  .action-btn.primary:disabled {
+    background: #555;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .action-btn.secondary {
+    background: none;
+    color: var(--ink);
+    border: 2px solid var(--border);
+  }
+
+  .action-btn.secondary:hover { border-color: var(--ink); }
+
+  /* PDF loading overlay */
+  #pdf-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,17,23,0.88);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  #pdf-overlay.visible { display: flex; }
+
+  .pdf-spinner {
+    width: 52px;
+    height: 52px;
+    border: 4px solid rgba(200,150,62,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .pdf-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--paper);
+    letter-spacing: 0.06em;
+  }
+
+  .pdf-sublabel {
+    font-size: 12px;
+    color: rgba(248,245,239,0.45);
+    letter-spacing: 0.08em;
+    margin-top: -12px;
+  }
+
+  /* iOS share tip banner */
+  .ios-tip {
+    display: none;
+    background: rgba(200,150,62,0.12);
+    border: 1px solid rgba(200,150,62,0.35);
+    border-radius: 4px;
+    padding: 14px 20px;
+    margin: 0 24px 0;
+    font-size: 13px;
+    color: var(--gold-light);
+    line-height: 1.6;
+    text-align: center;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ios-tip strong { color: var(--gold); }
+
+  @media print {
+    #landing, #quiz, #company-form { display: none !important; }
+    #report { display: block !important; }
+    .report-actions, #pdf-overlay, .ios-tip { display: none !important; }
+  }
+
+  /* Divider */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 3px solid var(--gold);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 600px) {
+    .quiz-header { flex-wrap: wrap; gap: 12px; }
+    .progress-wrap { order: 3; width: 100%; margin: 0; max-width: 100%; }
+    .dim-row { flex-wrap: nowrap; }
+    .dim-name { min-width: 140px; font-size: 12px; }
+    .report-actions { flex-direction: column; align-items: center; }
+  }
+
+  @media print {
+    #landing, #quiz, #company-form { display: none !important; }
+    #report { display: block !important; }
+    .report-actions { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ LANDING ═══════════════════ -->
+<section id="landing">
+  <div class="landing-inner">
+    <div class="badge">Ferramenta de Diagnóstico Empresarial</div>
+    <h1 class="landing-title">Gestão da<br><span>Qualidade</span></h1>
+    <p class="landing-subtitle">Avalie o nível de maturidade do sistema de gestão da qualidade da sua empresa com 30 perguntas estratégicas e receba um diagnóstico completo e gratuito.</p>
+
+    <!-- QR Code (visível para todos quando URL pública está ativa) -->
+    <div id="qr-section" style="display:none;flex-direction:column;align-items:center;gap:0">
+      <div class="qr-wrapper">
+        <div id="qrcode"></div>
+      </div>
+      <p class="qr-label">Escaneie para abrir no celular</p>
+      <!-- url-status e botão alterar: só visível para o admin (duplo toque no QR) -->
+      <div id="url-status" style="display:none;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap;justify-content:center">
+        <span class="url-dot"></span>
+        <span class="url-display-text" id="url-display"></span>
+        <button class="url-reset-btn" onclick="resetURL()">✎ Alterar URL</button>
+      </div>
+    </div>
+
+    <!-- Painel de configuração: só para o admin / dono da ferramenta -->
+    <div id="url-config-panel" style="display:none;flex-direction:column;align-items:center;width:100%;max-width:480px;margin-bottom:8px">
+      <div class="config-card">
+        <div class="config-icon">🔗</div>
+        <div class="config-title">Ative o QR Code</div>
+        <div class="config-desc">
+          Publique este arquivo gratuitamente no <strong>GitHub Pages</strong> e cole a URL abaixo para gerar o QR Code funcional que qualquer pessoa pode escanear.
+        </div>
+        <div class="config-input-row">
+          <input id="url-input" class="config-input" type="url" placeholder="https://seuusuario.github.io/diagnostico" />
+          <button class="config-save-btn" onclick="savePublicURL()">Gerar QR</button>
+        </div>
+        <div class="config-hint">Consulte as instruções de publicação no GitHub Pages ↓</div>
+      </div>
+
+      <!-- Guia GitHub Pages — só no painel admin/config -->
+      <div class="publish-guide">
+        <div class="publish-title">🚀 Publicar grátis no GitHub Pages — sem senha, sem assinatura</div>
+        <div class="publish-steps">
+          <div class="pub-step">
+            <span class="pub-num">1</span>
+            <div>Acesse <a href="https://github.com" target="_blank" class="pub-link">github.com</a> → crie uma conta gratuita (ou faça login)</div>
+          </div>
+          <div class="pub-step">
+            <span class="pub-num">2</span>
+            <div>Clique em <strong>"New repository"</strong> → nomeie como <code>diagnostico</code> → marque <strong>Public</strong> → clique <strong>"Create repository"</strong></div>
+          </div>
+          <div class="pub-step">
+            <span class="pub-num">3</span>
+            <div>Dentro do repositório, clique em <strong>"uploading an existing file"</strong> → arraste o arquivo → <strong>renomeie para <code>index.html</code></strong> → clique <strong>"Commit changes"</strong></div>
+          </div>
+          <div class="pub-step">
+            <span class="pub-num">4</span>
+            <div>Vá em <strong>Settings → Pages</strong> → Source: <strong>"Deploy from a branch"</strong> → Branch: <strong>main</strong> → pasta: <strong>/ (root)</strong> → <strong>Save</strong></div>
+          </div>
+          <div class="pub-step">
+            <span class="pub-num">5</span>
+            <div>Aguarde ~1 min. Sua URL pública: <code>https://seuusuario.github.io/diagnostico</code></div>
+          </div>
+          <div class="pub-step">
+            <span class="pub-num">6</span>
+            <div>Cole a URL acima → clique <strong>"Gerar QR"</strong> → pronto! 🎉</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startForm()">Iniciar Diagnóstico →</button>
+
+    <div class="stats-row">
+      <div class="stat"><span class="stat-num">30</span><span class="stat-lbl">Perguntas</span></div>
+      <div class="stat"><span class="stat-num">7</span><span class="stat-lbl">Dimensões</span></div>
+      <div class="stat"><span class="stat-num">~12</span><span class="stat-lbl">Minutos</span></div>
+      <div class="stat"><span class="stat-num">100%</span><span class="stat-lbl">Gratuito</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ COMPANY FORM ═══════════════════ -->
+<section id="company-form">
+  <div class="form-inner">
+    <h2 class="form-title">Sobre a Empresa</h2>
+    <p class="form-sub">Antes de iniciar, precisamos de algumas informações básicas para personalizar o diagnóstico.</p>
+
+    <div class="field-group">
+      <label class="field-label">Nome da empresa *</label>
+      <input class="field-input" id="f-company" type="text" placeholder="Ex: Indústrias ABC Ltda." required>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Responsável pelo preenchimento *</label>
+      <input class="field-input" id="f-name" type="text" placeholder="Nome completo">
+    </div>
+    <div class="field-group">
+      <label class="field-label">E-mail *</label>
+      <input class="field-input" id="f-email" type="email" placeholder="email@empresa.com.br">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Telefone / WhatsApp *</label>
+      <input class="field-input" id="f-phone" type="tel" placeholder="(31) 9 0000-0000">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Cargo / Função</label>
+      <input class="field-input" id="f-role" type="text" placeholder="Ex: Gerente de Qualidade">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Setor / Segmento</label>
+      <select class="field-select" id="f-sector">
+        <option value="">Selecione o setor...</option>
+        <option>Indústria Manufatureira</option>
+        <option>Serviços</option>
+        <option>Construção Civil</option>
+        <option>Saúde</option>
+        <option>Tecnologia</option>
+        <option>Alimentos & Bebidas</option>
+        <option>Logística & Transporte</option>
+        <option>Varejo & Comércio</option>
+        <option>Agronegócio</option>
+        <option>Outro</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Número de colaboradores</label>
+      <select class="field-select" id="f-size">
+        <option value="">Selecione...</option>
+        <option>1 a 9 (Microempresa)</option>
+        <option>10 a 49 (Pequena empresa)</option>
+        <option>50 a 249 (Média empresa)</option>
+        <option>250 ou mais (Grande empresa)</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Possui certificação ISO 9001?</label>
+      <select class="field-select" id="f-iso">
+        <option value="">Selecione...</option>
+        <option>Sim, certificada</option>
+        <option>Em processo de certificação</option>
+        <option>Não, mas pretendemos</option>
+        <option>Não e não pretendemos</option>
+      </select>
+    </div>
+
+    <button class="form-submit" onclick="startQuiz()">Iniciar Questionário →</button>
+  </div>
+</section>
+
+<!-- ═══════════════════ QUIZ ═══════════════════ -->
+<section id="quiz">
+  <header class="quiz-header">
+    <div class="quiz-logo">Q<span>.</span>Diagnóstico</div>
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-label">Progresso</span>
+        <span class="progress-count" id="prog-count">0 / 30</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="prog-fill"></div>
+      </div>
+    </div>
+    <div class="section-tag" id="section-tag">–</div>
+  </header>
+
+  <div class="quiz-body">
+    <div id="question-block" class="question-block"></div>
+
+    <div class="nav-row">
+      <button class="nav-back" id="btn-back" onclick="goBack()">← Anterior</button>
+      <button class="nav-next" id="btn-next" onclick="goNext()">Próxima →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ REPORT ═══════════════════ -->
+<section id="report">
+  <div class="report-cover">
+    <div class="report-badge">Diagnóstico de Gestão da Qualidade</div>
+    <div class="report-company-name" id="r-company">—</div>
+    <div class="report-date" id="r-date">—</div>
+
+    <div class="score-ring-wrap">
+      <div class="score-ring">
+        <svg viewBox="0 0 180 180">
+          <circle class="score-ring-track" cx="90" cy="90" r="80"/>
+          <circle class="score-ring-fill" id="ring-fill" cx="90" cy="90" r="80"/>
+        </svg>
+        <div class="score-inner">
+          <div class="score-num"><span id="r-score">0</span><span class="score-pct">%</span></div>
+          <div class="score-label">maturidade</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="maturity-label" id="r-maturity">—</div>
+    <div class="maturity-desc" id="r-maturity-desc">—</div>
+  </div>
+
+  <div class="report-body">
+
+    <!-- Radar -->
+    <div class="section-header" style="margin-top:0">
+      <div class="section-icon">📊</div>
+      <div>
+        <div class="section-title-h">Visão por Dimensão</div>
+        <div class="section-title-sub">Radar de maturidade das 7 dimensões avaliadas</div>
+      </div>
+    </div>
+
+    <div class="radar-wrap">
+      <svg id="radar-svg" viewBox="0 0 360 360"></svg>
+    </div>
+
+    <!-- Dimension bars -->
+    <div class="section-header">
+      <div class="section-icon">📈</div>
+      <div>
+        <div class="section-title-h">Pontuação por Dimensão</div>
+        <div class="section-title-sub">Desempenho detalhado em cada área avaliada</div>
+      </div>
+    </div>
+
+    <div class="dim-grid" id="dim-grid"></div>
+
+    <div class="section-divider"></div>
+
+    <!-- Findings -->
+    <div class="section-header">
+      <div class="section-icon">🔍</div>
+      <div>
+        <div class="section-title-h">Principais Achados</div>
+        <div class="section-title-sub">Forças, pontos de atenção e oportunidades identificados</div>
+      </div>
+    </div>
+
+    <div class="findings-grid" id="findings-grid"></div>
+
+    <div class="section-divider"></div>
+
+    <!-- Recommendations -->
+    <div class="section-header">
+      <div class="section-icon">🎯</div>
+      <div>
+        <div class="section-title-h">Plano de Ação Recomendado</div>
+        <div class="section-title-sub">Ações priorizadas para evolução do sistema de qualidade</div>
+      </div>
+    </div>
+
+    <div class="rec-list" id="rec-list"></div>
+
+    <div class="section-divider"></div>
+
+    <!-- Conclusion -->
+    <div class="section-header">
+      <div class="section-icon">📋</div>
+      <div>
+        <div class="section-title-h">Conclusão</div>
+        <div class="section-title-sub">Síntese e próximos passos</div>
+      </div>
+    </div>
+
+    <div id="conclusion-text" style="font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:48px;"></div>
+
+  </div>
+
+  <div class="ios-tip" id="ios-tip">
+    📱 <strong>iPhone/iPad:</strong> O PDF foi gerado e o download iniciou automaticamente. Se não abrir, toque em <strong>"Abrir em…"</strong> ou verifique sua pasta de <strong>Downloads</strong> no app Arquivos.
+  </div>
+
+  <div class="report-actions">
+    <button class="action-btn primary" id="btn-pdf" onclick="exportPDF()">📄 Gerar PDF do Diagnóstico</button>
+    <button class="action-btn secondary" onclick="restart()">↩ Novo Diagnóstico</button>
+  </div>
+</section>
+
+<!-- PDF loading overlay -->
+<div id="pdf-overlay">
+  <div class="pdf-spinner"></div>
+  <div class="pdf-label" id="pdf-label">Preparando relatório…</div>
+  <div class="pdf-sublabel" id="pdf-sublabel">Cada seção será uma página separada</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════
+
+const DIMENSIONS = [
+  { id: 'lideranca',     name: 'Liderança & Comprometimento', icon: '👔', color: '#c8963e' },
+  { id: 'planejamento',  name: 'Planejamento Estratégico',    icon: '📐', color: '#3d6b5e' },
+  { id: 'processos',     name: 'Gestão de Processos',         icon: '⚙️',  color: '#b54a2f' },
+  { id: 'pessoas',       name: 'Pessoas & Competência',       icon: '👥', color: '#5a6e8a' },
+  { id: 'monitoramento', name: 'Monitoramento & Melhoria',    icon: '📊', color: '#7a5ea0' },
+  { id: 'cliente',       name: 'Foco no Cliente',             icon: '🤝', color: '#2e7d6b' },
+  { id: 'documentacao',  name: 'Documentação & Controle',     icon: '📁', color: '#8a4f2e' },
+];
+
+const QUESTIONS = [
+  // LIDERANÇA (0-3)
+  { dim: 'lideranca', text: 'Como a alta direção demonstra comprometimento com a gestão da qualidade?', opts: [
+    { text: 'Não há envolvimento visível da liderança', score: 1 },
+    { text: 'A liderança participa eventualmente quando solicitada', score: 2 },
+    { text: 'A liderança comunica a política de qualidade periodicamente', score: 3 },
+    { text: 'A liderança lidera ativamente e integra qualidade à estratégia', score: 4 },
+  ]},
+  { dim: 'lideranca', text: 'Existe uma Política da Qualidade formalmente definida e comunicada?', opts: [
+    { text: 'Não existe política de qualidade', score: 1 },
+    { text: 'Existe informalmente, mas não está documentada', score: 2 },
+    { text: 'Está documentada, mas pouco divulgada', score: 3 },
+    { text: 'Está documentada, divulgada e compreendida por todos', score: 4 },
+  ]},
+  { dim: 'lideranca', text: 'Como são definidas as responsabilidades pela qualidade?', opts: [
+    { text: 'Não há definição clara de responsabilidades', score: 1 },
+    { text: 'Responsabilidades são informais e não documentadas', score: 2 },
+    { text: 'Estão documentadas mas nem sempre seguidas', score: 3 },
+    { text: 'Estão formalizadas, conhecidas e praticadas por todos', score: 4 },
+  ]},
+  { dim: 'lideranca', text: 'A empresa realiza análise crítica do sistema de qualidade pela direção?', opts: [
+    { text: 'Nunca realiza análise crítica', score: 1 },
+    { text: 'Realiza somente em situações de crise', score: 2 },
+    { text: 'Realiza anualmente de forma estruturada', score: 3 },
+    { text: 'Realiza periodicamente com análise de KPIs e tomada de ação', score: 4 },
+  ]},
+
+  // PLANEJAMENTO (4-7)
+  { dim: 'planejamento', text: 'Como a empresa identifica e gerencia riscos e oportunidades?', opts: [
+    { text: 'Não há processo de gestão de riscos', score: 1 },
+    { text: 'Riscos são tratados reativamente quando surgem', score: 2 },
+    { text: 'Existe uma análise de riscos, mas sem monitoramento regular', score: 3 },
+    { text: 'Gestão de riscos estruturada, integrada ao planejamento estratégico', score: 4 },
+  ]},
+  { dim: 'planejamento', text: 'A empresa estabelece objetivos de qualidade mensuráveis?', opts: [
+    { text: 'Não existem objetivos formais de qualidade', score: 1 },
+    { text: 'Existem objetivos vagos sem métricas definidas', score: 2 },
+    { text: 'Objetivos definidos com metas, mas seguimento irregular', score: 3 },
+    { text: 'Objetivos SMART, acompanhados mensalmente com planos de ação', score: 4 },
+  ]},
+  { dim: 'planejamento', text: 'Como o planejamento de mudanças é conduzido na empresa?', opts: [
+    { text: 'Mudanças ocorrem sem planejamento prévio', score: 1 },
+    { text: 'Há algum planejamento, mas sem avaliação de impacto', score: 2 },
+    { text: 'Mudanças são planejadas com avaliação básica de riscos', score: 3 },
+    { text: 'Gestão de mudanças estruturada com impacto avaliado e documentado', score: 4 },
+  ]},
+  { dim: 'planejamento', text: 'Existe planejamento de recursos (humanos, infraestrutura, financeiros) para a qualidade?', opts: [
+    { text: 'Não há planejamento de recursos para qualidade', score: 1 },
+    { text: 'Recursos são alocados pontualmente quando necessário', score: 2 },
+    { text: 'Existe planejamento anual básico de recursos', score: 3 },
+    { text: 'Planejamento integrado com orçamento dedicado à qualidade', score: 4 },
+  ]},
+
+  // PROCESSOS (8-12)
+  { dim: 'processos', text: 'Os processos críticos da empresa estão mapeados e documentados?', opts: [
+    { text: 'Nenhum processo está documentado', score: 1 },
+    { text: 'Alguns processos chave estão documentados informalmente', score: 2 },
+    { text: 'Principais processos documentados, mas desatualizados', score: 3 },
+    { text: 'Todos os processos críticos documentados, atualizados e disponíveis', score: 4 },
+  ]},
+  { dim: 'processos', text: 'Como é feito o controle de não conformidades?', opts: [
+    { text: 'Não há controle sistemático de não conformidades', score: 1 },
+    { text: 'Não conformidades são registradas mas sem tratamento formal', score: 2 },
+    { text: 'Existe processo de tratamento com análise de causa básica', score: 3 },
+    { text: 'Sistema completo: registro, análise de causa raiz, ação corretiva e verificação', score: 4 },
+  ]},
+  { dim: 'processos', text: 'A empresa realiza controle de qualidade em produtos/serviços?', opts: [
+    { text: 'Não há inspeção ou controle de qualidade', score: 1 },
+    { text: 'Inspeções informais, dependentes do operador', score: 2 },
+    { text: 'Procedimentos de inspeção definidos mas sem padronização total', score: 3 },
+    { text: 'Controle estatístico de processo (CEP) e planos de controle implementados', score: 4 },
+  ]},
+  { dim: 'processos', text: 'Como é gerenciada a cadeia de fornecedores em relação à qualidade?', opts: [
+    { text: 'Não há qualificação ou avaliação de fornecedores', score: 1 },
+    { text: 'Fornecedores são avaliados informalmente', score: 2 },
+    { text: 'Existe processo de qualificação e avaliação periódica', score: 3 },
+    { text: 'Desenvolvimento ativo de fornecedores com indicadores e auditorias', score: 4 },
+  ]},
+  { dim: 'processos', text: 'Existe rastreabilidade de produtos/serviços ao longo do processo?', opts: [
+    { text: 'Não há rastreabilidade', score: 1 },
+    { text: 'Rastreabilidade parcial em alguns produtos', score: 2 },
+    { text: 'Rastreabilidade implementada, mas com gaps', score: 3 },
+    { text: 'Rastreabilidade completa do início ao fim, integrada ao sistema', score: 4 },
+  ]},
+
+  // PESSOAS (13-16)
+  { dim: 'pessoas', text: 'Como a empresa identifica e garante as competências necessárias?', opts: [
+    { text: 'Não há mapeamento de competências', score: 1 },
+    { text: 'Competências identificadas informalmente pelos gestores', score: 2 },
+    { text: 'Matriz de competências definida com lacunas identificadas', score: 3 },
+    { text: 'Gestão por competências integrada ao desenvolvimento e treinamento', score: 4 },
+  ]},
+  { dim: 'pessoas', text: 'Como é o programa de treinamento em qualidade?', opts: [
+    { text: 'Não há programa formal de treinamento', score: 1 },
+    { text: 'Treinamentos realizados pontualmente sem planejamento', score: 2 },
+    { text: 'Plano anual de treinamento com avaliação de eficácia básica', score: 3 },
+    { text: 'Programa estruturado com LNT, execução, avaliação de eficácia e ROI', score: 4 },
+  ]},
+  { dim: 'pessoas', text: 'Os colaboradores participam de programas de melhoria contínua?', opts: [
+    { text: 'Não há envolvimento dos colaboradores em melhoria', score: 1 },
+    { text: 'Sugestões são aceitas informalmente', score: 2 },
+    { text: 'Existe canal formal de sugestões com análise', score: 3 },
+    { text: 'Grupos de melhoria (Kaizen, CCQ) ativos com metas e reconhecimento', score: 4 },
+  ]},
+  { dim: 'pessoas', text: 'Como é medido e promovido o engajamento com a qualidade?', opts: [
+    { text: 'Não há ações de engajamento em qualidade', score: 1 },
+    { text: 'Comunicados periódicos sobre qualidade', score: 2 },
+    { text: 'Campanhas de conscientização e métricas de engajamento', score: 3 },
+    { text: 'Cultura da qualidade consolidada, medida e celebrada continuamente', score: 4 },
+  ]},
+
+  // MONITORAMENTO (17-21)
+  { dim: 'monitoramento', text: 'A empresa possui indicadores de desempenho da qualidade (KPIs)?', opts: [
+    { text: 'Não há KPIs de qualidade definidos', score: 1 },
+    { text: 'Alguns indicadores informais sem periodicidade', score: 2 },
+    { text: 'KPIs definidos e monitorados mensalmente', score: 3 },
+    { text: 'Dashboard completo com KPIs, tendências e alertas automáticos', score: 4 },
+  ]},
+  { dim: 'monitoramento', text: 'São realizadas auditorias internas de qualidade?', opts: [
+    { text: 'Não são realizadas auditorias internas', score: 1 },
+    { text: 'Auditorias informais e esporádicas', score: 2 },
+    { text: 'Programa de auditoria interna anual com plano', score: 3 },
+    { text: 'Programa robusto com auditores qualificados, follow-up e eficácia verificada', score: 4 },
+  ]},
+  { dim: 'monitoramento', text: 'Como são gerenciados os instrumentos de medição e controle?', opts: [
+    { text: 'Não há controle de instrumentos de medição', score: 1 },
+    { text: 'Calibração realizada esporadicamente', score: 2 },
+    { text: 'Programa de calibração definido com controle básico', score: 3 },
+    { text: 'Gestão metrológica completa com rastreabilidade e análise de MSA', score: 4 },
+  ]},
+  { dim: 'monitoramento', text: 'A empresa utiliza ferramentas de análise de dados para decisões de qualidade?', opts: [
+    { text: 'Decisões são tomadas sem análise de dados', score: 1 },
+    { text: 'Análise básica de dados em planilhas', score: 2 },
+    { text: 'Uso regular de ferramentas estatísticas e relatórios', score: 3 },
+    { text: 'Business Intelligence e análise preditiva para qualidade', score: 4 },
+  ]},
+  { dim: 'monitoramento', text: 'Existe um processo estruturado de melhoria contínua?', opts: [
+    { text: 'Melhorias ocorrem de forma reativa e não sistemática', score: 1 },
+    { text: 'Há esforços de melhoria mas sem metodologia definida', score: 2 },
+    { text: 'PDCA ou outra metodologia aplicada em projetos específicos', score: 3 },
+    { text: 'Lean Six Sigma ou metodologia equivalente implantada sistematicamente', score: 4 },
+  ]},
+
+  // CLIENTE (22-25)
+  { dim: 'cliente', text: 'Como a empresa coleta e analisa a satisfação do cliente?', opts: [
+    { text: 'Não há pesquisa ou coleta de satisfação', score: 1 },
+    { text: 'Reclamações são registradas informalmente', score: 2 },
+    { text: 'Pesquisa de satisfação periódica com análise básica', score: 3 },
+    { text: 'NPS ou sistema estruturado com análise e ações de melhoria', score: 4 },
+  ]},
+  { dim: 'cliente', text: 'Como são tratadas as reclamações de clientes?', opts: [
+    { text: 'Sem processo formal de tratamento de reclamações', score: 1 },
+    { text: 'Reclamações são resolvidas caso a caso', score: 2 },
+    { text: 'Processo formal com registro, análise e resposta ao cliente', score: 3 },
+    { text: 'Sistema completo: 8D, análise de causa raiz, prevenção e monitoramento', score: 4 },
+  ]},
+  { dim: 'cliente', text: 'Os requisitos do cliente são traduzidos para especificações internas?', opts: [
+    { text: 'Requisitos não são formalmente capturados', score: 1 },
+    { text: 'Requisitos registrados em contrato mas sem desdobramento', score: 2 },
+    { text: 'Requisitos traduzidos para especificações nos principais processos', score: 3 },
+    { text: 'QFD ou metodologia equivalente para desdobrar voz do cliente', score: 4 },
+  ]},
+  { dim: 'cliente', text: 'A empresa monitora e analisa o relacionamento com o cliente pós-venda?', opts: [
+    { text: 'Não há acompanhamento pós-venda de qualidade', score: 1 },
+    { text: 'Contato eventual com cliente após entrega', score: 2 },
+    { text: 'Processo de pós-venda estruturado com indicadores', score: 3 },
+    { text: 'Relacionamento contínuo com clientes e parceiros estratégicos', score: 4 },
+  ]},
+
+  // DOCUMENTAÇÃO (26-29)
+  { dim: 'documentacao', text: 'Como é feito o controle de documentos e registros da qualidade?', opts: [
+    { text: 'Não há controle de documentos', score: 1 },
+    { text: 'Documentos em pastas físicas sem controle de versão', score: 2 },
+    { text: 'Sistema de gestão documental básico com controle de versão', score: 3 },
+    { text: 'Sistema eletrônico integrado com aprovações, revisões e rastreabilidade', score: 4 },
+  ]},
+  { dim: 'documentacao', text: 'Os procedimentos operacionais estão documentados e atualizados?', opts: [
+    { text: 'Procedimentos não estão documentados', score: 1 },
+    { text: 'Documentação parcial e desatualizada', score: 2 },
+    { text: 'Maioria dos procedimentos documentados e revisados anualmente', score: 3 },
+    { text: 'Todos os POPs atualizados, disponíveis nos postos de trabalho', score: 4 },
+  ]},
+  { dim: 'documentacao', text: 'Como são mantidos os registros de qualidade para evidenciar conformidade?', opts: [
+    { text: 'Registros não são mantidos sistematicamente', score: 1 },
+    { text: 'Registros mantidos de forma ad-hoc em papel', score: 2 },
+    { text: 'Registros organizados com tempo de retenção definido', score: 3 },
+    { text: 'Registros digitais completos, com backup e acesso controlado', score: 4 },
+  ]},
+  { dim: 'documentacao', text: 'Existe controle de informações de origem externa (normas, legislação, etc.)?', opts: [
+    { text: 'Nenhum controle de informações externas', score: 1 },
+    { text: 'Monitoramento informal de normas e legislação', score: 2 },
+    { text: 'Processo definido de atualização de normas e requisitos legais', score: 3 },
+    { text: 'Sistema integrado de gestão de requisitos legais e normativos com alertas', score: 4 },
+  ]},
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let companyData = {};
+
+// ═══════════════════════════════════════════════════
+// QR CODE — detecção automática de URL pública
+// ═══════════════════════════════════════════════════
+
+const QR_STORAGE_KEY = 'qdiag_public_url';
+
+function getPublicURL() {
+  const saved = localStorage.getItem(QR_STORAGE_KEY);
+  if (saved) return saved;
+  const loc = window.location;
+  const isLocal = loc.protocol === 'file:'
+    || loc.hostname === 'localhost'
+    || loc.hostname === '127.0.0.1'
+    || loc.hostname === '';
+  if (!isLocal) return loc.origin + loc.pathname.replace(/\/+$/, '');
+  return null;
+}
+
+function generateQR(url) {
+  const el = document.getElementById('qrcode');
+  el.innerHTML = '';
+  new QRCode(el, {
+    text: url,
+    width: 168,
+    height: 168,
+    colorDark: '#0d1117',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+function showQRSection(url) {
+  const sec = document.getElementById('qr-section');
+  sec.style.display = 'flex';
+  document.getElementById('url-config-panel').style.display = 'none';
+  document.getElementById('url-display').textContent = url;
+  // url-status hidden from users by default; admin reveals via double-tap
+  document.getElementById('url-status').style.display = 'none';
+  generateQR(url);
+
+  // Admin mode: double-tap the QR wrapper reveals URL controls
+  let tapCount = 0, tapTimer;
+  document.querySelector('.qr-wrapper').addEventListener('click', () => {
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => {
+      if (tapCount >= 2) {
+        const st = document.getElementById('url-status');
+        st.style.display = st.style.display === 'flex' ? 'none' : 'flex';
+      }
+      tapCount = 0;
+    }, 350);
+  });
+}
+
+function showConfigPanel() {
+  document.getElementById('qr-section').style.display = 'none';
+  document.getElementById('url-config-panel').style.display = 'flex';
+}
+
+function savePublicURL() {
+  const input = document.getElementById('url-input').value.trim().replace(/\/$/, '');
+  if (!input.startsWith('http')) {
+    showToast('Cole uma URL válida começando com https://');
+    return;
+  }
+  localStorage.setItem(QR_STORAGE_KEY, input);
+  showQRSection(input);
+  showToast('QR Code gerado com sucesso! ✓');
+}
+
+function resetURL() {
+  localStorage.removeItem(QR_STORAGE_KEY);
+  showConfigPanel();
+}
+
+window.addEventListener('load', () => {
+  const url = getPublicURL();
+  if (url) {
+    showQRSection(url);
+  } else {
+    showConfigPanel();
+  }
+});
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+
+function show(id) {
+  const displayMap = {
+    'landing':      'flex',
+    'company-form': 'block',
+    'quiz':         'block',
+    'report':       'block',
+  };
+  ['landing','company-form','quiz','report'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = s === id ? displayMap[s] : 'none';
+  });
+}
+
+function startForm() {
+  show('company-form');
+  window.scrollTo(0,0);
+}
+
+function startQuiz() {
+  const company = document.getElementById('f-company').value.trim();
+  const name    = document.getElementById('f-name').value.trim();
+  const email   = document.getElementById('f-email').value.trim();
+  const phone   = document.getElementById('f-phone').value.trim();
+
+  if (!company) { showToast('Por favor, informe o nome da empresa.'); return; }
+  if (!name)    { showToast('Por favor, informe o responsável pelo preenchimento.'); return; }
+  if (!email || !email.includes('@')) { showToast('Por favor, informe um e-mail válido.'); return; }
+  if (!phone)   { showToast('Por favor, informe o telefone/WhatsApp.'); return; }
+
+  companyData = {
+    company,
+    name,
+    email,
+    phone,
+    role:   document.getElementById('f-role').value.trim(),
+    sector: document.getElementById('f-sector').value,
+    size:   document.getElementById('f-size').value,
+    iso:    document.getElementById('f-iso').value,
+  };
+
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  show('quiz');
+  renderQuestion();
+  window.scrollTo(0,0);
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  const dimIndex = DIMENSIONS.findIndex(d => d.id === q.dim);
+  const dim = DIMENSIONS[dimIndex];
+  const letters = ['A','B','C','D'];
+
+  document.getElementById('section-tag').textContent = dim.name;
+  document.getElementById('prog-count').textContent = `${current + 1} / ${QUESTIONS.length}`;
+  document.getElementById('prog-fill').style.width = `${((current) / QUESTIONS.length) * 100}%`;
+
+  const selected = answers[current];
+
+  const html = `
+    <div class="q-section">${dim.icon} ${dim.name}</div>
+    <div class="q-number">${String(current + 1).padStart(2,'0')}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="options-grid">
+      ${q.opts.map((opt, i) => `
+        <button class="option-btn ${selected === i ? 'selected' : ''}" onclick="selectOption(${i})">
+          <span class="opt-letter">${letters[i]}</span>
+          <span class="opt-text">${opt.text}</span>
+          <span class="opt-score">${opt.score}/4</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  const block = document.getElementById('question-block');
+  block.style.animation = 'none';
+  block.offsetHeight; // reflow
+  block.style.animation = '';
+  block.innerHTML = html;
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.classList.toggle('active', selected !== null);
+
+  const isLast = current === QUESTIONS.length - 1;
+  nextBtn.textContent = isLast ? 'Ver Diagnóstico ✓' : 'Próxima →';
+
+  document.getElementById('btn-back').style.visibility = current === 0 ? 'hidden' : 'visible';
+}
+
+function selectOption(idx) {
+  answers[current] = idx;
+  document.querySelectorAll('.option-btn').forEach((b, i) => {
+    b.classList.toggle('selected', i === idx);
+  });
+  document.querySelectorAll('.opt-letter').forEach((l, i) => {
+    // handled by CSS
+  });
+  document.getElementById('btn-next').classList.add('active');
+
+  const isLast = current === QUESTIONS.length - 1;
+  document.getElementById('btn-next').textContent = isLast ? 'Ver Diagnóstico ✓' : 'Próxima →';
+}
+
+function goNext() {
+  if (answers[current] === null) return;
+  if (current === QUESTIONS.length - 1) {
+    buildReport();
+    return;
+  }
+  current++;
+  renderQuestion();
+  window.scrollTo(0,80);
+}
+
+function goBack() {
+  if (current === 0) return;
+  current--;
+  renderQuestion();
+  window.scrollTo(0,80);
+}
+
+// ═══════════════════════════════════════════════════
+// GOOGLE SHEETS — envio automático de dados
+// ═══════════════════════════════════════════════════
+
+// Cole aqui a URL do seu Google Apps Script após configurar:
+const SHEETS_WEBHOOK = 'https://script.google.com/macros/s/AKfycbzJ7Q3XW8vDFryjL4d3_ZfjfPXoC9Bn7GG_d94fsiDOseb0TtPu9iw4UCkDdmJnTlo/exec';
+
+async function sendToSheets(payload) {
+  if (!SHEETS_WEBHOOK || SHEETS_WEBHOOK.includes('COLE_AQUI')) return; // não configurado ainda
+  try {
+    await fetch(SHEETS_WEBHOOK, {
+      method: 'POST',
+      mode: 'no-cors', // necessário para Apps Script
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    console.warn('Sheets: erro ao enviar dados', e);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// REPORT
+// ═══════════════════════════════════════════════════
+
+function buildReport() {
+  show('report');
+  window.scrollTo(0,0);
+
+  // Compute scores
+  const dimScores = {};
+  DIMENSIONS.forEach(d => { dimScores[d.id] = { total: 0, count: 0 }; });
+
+  QUESTIONS.forEach((q, i) => {
+    if (answers[i] !== null) {
+      const score = q.opts[answers[i]].score;
+      dimScores[q.dim].total += score;
+      dimScores[q.dim].count++;
+    }
+  });
+
+  const dimResults = DIMENSIONS.map(d => {
+    const ds = dimScores[d.id];
+    const pct = ds.count > 0 ? Math.round((ds.total / (ds.count * 4)) * 100) : 0;
+    return { ...d, pct };
+  });
+
+  const globalPct = Math.round(dimResults.reduce((s, d) => s + d.pct, 0) / dimResults.length);
+  const maturity  = getMaturity(globalPct);
+
+  // ── Enviar para Google Sheets ──
+  const sheetsPayload = {
+    timestamp:  new Date().toLocaleString('pt-BR'),
+    empresa:    companyData.company,
+    responsavel:companyData.name,
+    email:      companyData.email,
+    telefone:   companyData.phone,
+    cargo:      companyData.role      || '',
+    setor:      companyData.sector    || '',
+    porte:      companyData.size      || '',
+    iso9001:    companyData.iso       || '',
+    score_global: globalPct,
+    nivel_maturidade: maturity.label,
+    ...Object.fromEntries(dimResults.map(d => [`dim_${d.id}`, d.pct]))
+  };
+  sendToSheets(sheetsPayload);
+
+  // Header
+  document.getElementById('r-company').textContent = companyData.company;
+  document.getElementById('r-date').textContent = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' }) + ' — ' + (companyData.sector || 'Setor não informado');
+  document.getElementById('r-maturity').textContent = maturity.label;
+  document.getElementById('r-maturity-desc').textContent = maturity.desc;
+
+  // Score ring animation
+  const scoreEl = document.getElementById('r-score');
+  const ringEl = document.getElementById('ring-fill');
+  const circumference = 502;
+  const offset = circumference - (globalPct / 100) * circumference;
+
+  let current_score = 0;
+  const scoreInterval = setInterval(() => {
+    current_score = Math.min(current_score + 2, globalPct);
+    scoreEl.textContent = current_score;
+    if (current_score >= globalPct) clearInterval(scoreInterval);
+  }, 25);
+
+  setTimeout(() => { ringEl.style.strokeDashoffset = offset; }, 100);
+
+  // Change ring color based on maturity
+  ringEl.style.stroke = maturity.color;
+
+  // Dimension bars
+  const dimGrid = document.getElementById('dim-grid');
+  dimGrid.innerHTML = dimResults.map(d => {
+    const grade = getGrade(d.pct);
+    return `
+      <div class="dim-row">
+        <div class="dim-name">${d.icon} ${d.name}</div>
+        <div class="dim-bar-wrap">
+          <div class="dim-bar-fill" style="background:${d.color};width:0%" data-target="${d.pct}"></div>
+        </div>
+        <div class="dim-score">${d.pct}%</div>
+        <span class="dim-grade" style="background:${grade.bg};color:${grade.text}">${grade.label}</span>
+      </div>
+    `;
+  }).join('');
+
+  setTimeout(() => {
+    document.querySelectorAll('.dim-bar-fill').forEach(el => {
+      el.style.width = el.dataset.target + '%';
+    });
+  }, 300);
+
+  // Radar
+  buildRadar(dimResults);
+
+  // Findings
+  buildFindings(dimResults, globalPct);
+
+  // Recommendations
+  buildRecommendations(dimResults, globalPct);
+
+  // Conclusion
+  buildConclusion(dimResults, globalPct, maturity);
+}
+
+function getMaturity(pct) {
+  if (pct >= 85) return { label: 'Classe Mundial', desc: 'Sistema de gestão da qualidade altamente maduro, com práticas de excelência e melhoria contínua consolidada.', color: '#3d6b5e' };
+  if (pct >= 70) return { label: 'Gerenciado', desc: 'Sistema bem estruturado com processos controlados. Foco na otimização e integração para atingir excelência.', color: '#5a9080' };
+  if (pct >= 55) return { label: 'Definido', desc: 'Processos documentados e seguidos. Necessidade de fortalecer monitoramento e cultura da qualidade.', color: '#c8963e' };
+  if (pct >= 40) return { label: 'Inicial', desc: 'Práticas básicas implementadas de forma irregular. Urgente estruturação do sistema de gestão.', color: '#e8803a' };
+  return { label: 'Emergente', desc: 'Sistema de gestão da qualidade ainda em estágio embrionário. Requer ação imediata e prioritária.', color: '#b54a2f' };
+}
+
+function getGrade(pct) {
+  if (pct >= 85) return { label: 'Excelente', bg: '#e8f5f0', text: '#2e7d6b' };
+  if (pct >= 70) return { label: 'Bom',       bg: '#f0f5e8', text: '#4a6e2e' };
+  if (pct >= 55) return { label: 'Regular',   bg: '#fdf3e0', text: '#8a6020' };
+  if (pct >= 40) return { label: 'Fraco',     bg: '#fde8dc', text: '#8a3820' };
+  return           { label: 'Crítico',  bg: '#fde8e8', text: '#8a2020' };
+}
+
+function buildRadar(dimResults) {
+  const svg = document.getElementById('radar-svg');
+  const cx = 180, cy = 180, r = 130;
+  const n = dimResults.length;
+  const angles = dimResults.map((_, i) => (i * 2 * Math.PI / n) - Math.PI / 2);
+
+  // Grid
+  let gridHtml = '';
+  [0.25, 0.5, 0.75, 1].forEach(pct => {
+    const pts = angles.map(a => [
+      cx + r * pct * Math.cos(a),
+      cy + r * pct * Math.sin(a)
+    ]);
+    gridHtml += `<polygon points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#d4c9b8" stroke-width="1"/>`;
+  });
+
+  // Axes
+  let axisHtml = '';
+  angles.forEach((a, i) => {
+    const x2 = cx + r * Math.cos(a);
+    const y2 = cy + r * Math.sin(a);
+    axisHtml += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#d4c9b8" stroke-width="1"/>`;
+
+    // Labels
+    const lx = cx + (r + 24) * Math.cos(a);
+    const ly = cy + (r + 24) * Math.sin(a);
+    const anchor = lx < cx - 5 ? 'end' : lx > cx + 5 ? 'start' : 'middle';
+    const shortName = dimResults[i].name.split(' ')[0];
+    axisHtml += `<text x="${lx}" y="${ly + 4}" text-anchor="${anchor}" font-size="11" fill="#7a6f62" font-family="DM Sans">${dimResults[i].icon} ${shortName}</text>`;
+  });
+
+  // Data polygon
+  const dataPts = angles.map((a, i) => {
+    const pct = dimResults[i].pct / 100;
+    return [cx + r * pct * Math.cos(a), cy + r * pct * Math.sin(a)];
+  });
+  const dataPath = dataPts.map(p => p.join(',')).join(' ');
+
+  svg.innerHTML = `
+    ${gridHtml}
+    ${axisHtml}
+    <polygon points="${dataPath}" fill="rgba(61,107,94,0.2)" stroke="#3d6b5e" stroke-width="2.5" stroke-linejoin="round"/>
+    ${dataPts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#3d6b5e"/>`).join('')}
+    <circle cx="${cx}" cy="${cy}" r="3" fill="#c8963e"/>
+  `;
+}
+
+function buildFindings(dimResults, globalPct) {
+  const sorted = [...dimResults].sort((a,b) => b.pct - a.pct);
+  const strengths = sorted.slice(0,2);
+  const weaknesses = sorted.slice(-2).reverse();
+
+  const findings = [
+    ...strengths.map(d => ({
+      type: 'strength',
+      typeLabel: '✓ Ponto Forte',
+      title: d.name,
+      text: generateFindingText(d, 'strength')
+    })),
+    ...weaknesses.map(d => ({
+      type: 'weakness',
+      typeLabel: '⚠ Ponto de Atenção',
+      title: d.name,
+      text: generateFindingText(d, 'weakness')
+    })),
+    {
+      type: 'opportunity',
+      typeLabel: '↗ Oportunidade',
+      title: 'Integração do Sistema',
+      text: globalPct < 60
+        ? 'A empresa tem oportunidade significativa de criar um sistema de gestão integrado que conecte todas as dimensões avaliadas, gerando sinergia e eficiência.'
+        : 'A maturidade existente cria base sólida para buscar certificação ISO 9001 ou evoluir para frameworks de excelência como o PNQ/MEG.'
+    }
+  ];
+
+  document.getElementById('findings-grid').innerHTML = findings.map(f => `
+    <div class="finding-card ${f.type}">
+      <div class="finding-type">${f.typeLabel}</div>
+      <div class="finding-title">${f.title}</div>
+      <div class="finding-text">${f.text}</div>
+    </div>
+  `).join('');
+}
+
+function generateFindingText(dim, type) {
+  const texts = {
+    strength: {
+      lideranca: 'A alta direção demonstra comprometimento claro com a qualidade, criando o ambiente necessário para a sustentação e evolução do sistema.',
+      planejamento: 'O planejamento estratégico da qualidade está bem estruturado, garantindo alinhamento entre objetivos organizacionais e metas de qualidade.',
+      processos: 'Os processos críticos estão controlados e documentados, garantindo consistência na entrega de produtos e serviços.',
+      pessoas: 'A gestão de pessoas demonstra maturidade, com colaboradores engajados e competências alinhadas às necessidades da qualidade.',
+      monitoramento: 'O monitoramento sistemático dos resultados permite tomada de decisão baseada em dados e identificação rápida de desvios.',
+      cliente: 'A organização demonstra forte orientação ao cliente, com processos estruturados de captura e resposta às necessidades e expectativas.',
+      documentacao: 'A gestão documental é um diferencial, garantindo controle, rastreabilidade e disponibilidade das informações de qualidade.',
+    },
+    weakness: {
+      lideranca: 'O comprometimento da liderança com a qualidade precisa ser fortalecido. Sem patrocínio da direção, as iniciativas de qualidade perdem força e sustentabilidade.',
+      planejamento: 'O planejamento da qualidade necessita de estruturação. Objetivos mal definidos ou ausentes comprometem o direcionamento de toda a organização.',
+      processos: 'Os processos carecem de maior controle e padronização. A falta de documentação e controle aumenta variabilidade e riscos de não conformidade.',
+      pessoas: 'A dimensão de pessoas requer atenção. Lacunas de competência e baixo engajamento impactam diretamente a eficácia do sistema de qualidade.',
+      monitoramento: 'O sistema de monitoramento precisa ser aprimorado. Sem métricas consistentes, é difícil identificar problemas e avaliar o progresso das melhorias.',
+      cliente: 'A orientação ao cliente apresenta lacunas importantes. Mecanismos mais robustos de escuta e resposta ao cliente são necessários.',
+      documentacao: 'A gestão de documentos e registros requer estruturação urgente. A falta de controle documental compromete a rastreabilidade e conformidade.',
+    }
+  };
+  return texts[type][dim.id] || `A dimensão ${dim.name} apresenta resultado de ${dim.pct}% de maturidade, requerendo atenção específica.`;
+}
+
+function buildRecommendations(dimResults, globalPct) {
+  const weakest = [...dimResults].sort((a,b) => a.pct - b.pct).slice(0,4);
+
+  const recs = weakest.map((d, i) => ({
+    priority: i < 2 ? 'Alta' : 'Média',
+    priorityClass: i < 2 ? 'priority-alta' : 'priority-media',
+    title: getRecTitle(d),
+    text: getRecText(d)
+  }));
+
+  if (globalPct < 60) {
+    recs.push({
+      priority: 'Alta',
+      priorityClass: 'priority-alta',
+      title: 'Implantar Programa Estruturado de Gestão da Qualidade',
+      text: 'Dado o estágio atual de maturidade, recomenda-se a contratação ou designação de um responsável pela qualidade e o início de um projeto estruturado de implantação do SGQ, com escopo, cronograma e patrocínio da direção.'
+    });
+  } else if (globalPct >= 70) {
+    recs.push({
+      priority: 'Média',
+      priorityClass: 'priority-media',
+      title: 'Considerar Certificação ISO 9001',
+      text: 'O nível de maturidade da empresa a coloca em posição favorável para buscar a certificação ISO 9001. Um gap analysis formal pode identificar os requisitos faltantes e dimensionar o esforço necessário.'
+    });
+  }
+
+  document.getElementById('rec-list').innerHTML = recs.map((r, i) => `
+    <div class="rec-item">
+      <div class="rec-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="rec-content">
+        <div class="rec-priority ${r.priorityClass}">● Prioridade ${r.priority}</div>
+        <div class="rec-title">${r.title}</div>
+        <div class="rec-text">${r.text}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function getRecTitle(d) {
+  const titles = {
+    lideranca: 'Fortalecer o Comprometimento e Liderança em Qualidade',
+    planejamento: 'Estruturar o Planejamento Estratégico da Qualidade',
+    processos: 'Mapear, Documentar e Controlar os Processos Críticos',
+    pessoas: 'Desenvolver Programa de Competências e Engajamento',
+    monitoramento: 'Implementar Sistema de Monitoramento e KPIs',
+    cliente: 'Estruturar Processos de Escuta e Resposta ao Cliente',
+    documentacao: 'Implantar Sistema de Gestão Documental',
+  };
+  return titles[d.id] || `Melhorar ${d.name}`;
+}
+
+function getRecText(d) {
+  const texts = {
+    lideranca: 'Conduzir workshop de sensibilização com a alta direção, definir patrocinador do SGQ, estabelecer reuniões periódicas de análise crítica e garantir que a política de qualidade seja comunicada e compreendida por toda a organização.',
+    planejamento: 'Desenvolver objetivos de qualidade SMART alinhados ao planejamento estratégico, implementar processo de identificação e tratamento de riscos e oportunidades, e garantir planejamento de recursos adequado para as iniciativas de qualidade.',
+    processos: 'Realizar mapeamento de processos (SIPOC e fluxogramas), documentar POPs para processos críticos, implementar sistema de controle de não conformidades e ações corretivas, e desenvolver qualificação de fornecedores.',
+    pessoas: 'Elaborar matriz de competências, desenvolver plano anual de treinamentos com avaliação de eficácia, implementar grupos de melhoria (Kaizen/CCQ) e criar programa de reconhecimento ligado a resultados de qualidade.',
+    monitoramento: 'Definir e implementar KPIs de qualidade com dashboard gerencial, estabelecer programa de auditorias internas, implementar metodologia de melhoria contínua (PDCA/Lean) e capacitar equipe em ferramentas de análise de dados.',
+    cliente: 'Implementar pesquisa de satisfação (NPS), estruturar processo formal de tratamento de reclamações com análise de causa raiz (8D), criar mecanismos de captura da voz do cliente e estabelecer programa de relacionamento pós-venda.',
+    documentacao: 'Implementar sistema de gestão documental com controle de versão, garantir disponibilidade dos documentos nos pontos de uso, definir matriz de retenção de registros e estabelecer processo de atualização de normas e requisitos legais.',
+  };
+  return texts[d.id] || `Desenvolver ações específicas para elevar o nível de maturidade em ${d.name}.`;
+}
+
+function buildConclusion(dimResults, globalPct, maturity) {
+  const bestDim = [...dimResults].sort((a,b) => b.pct - a.pct)[0];
+  const worstDim = [...dimResults].sort((a,b) => a.pct - b.pct)[0];
+
+  const text = `
+    O diagnóstico de Gestão da Qualidade da <strong>${companyData.company}</strong> revelou um índice global de maturidade de <strong>${globalPct}%</strong>, classificando a organização no nível "<strong>${maturity.label}</strong>".
+    <br><br>
+    ${companyData.sector ? `Considerando o segmento de <strong>${companyData.sector}</strong>, este resultado ` : 'Este resultado '}
+    indica que a empresa possui ${globalPct >= 60 ? 'uma base sólida para evolução' : 'oportunidades significativas de melhoria'} em seu sistema de gestão da qualidade.
+    <br><br>
+    O ponto mais forte identificado foi a dimensão de <strong>${bestDim.name}</strong> (${bestDim.pct}%), enquanto a maior oportunidade de melhoria está em <strong>${worstDim.name}</strong> (${worstDim.pct}%).
+    <br><br>
+    Recomenda-se priorizar as ações de melhoria identificadas neste diagnóstico, com especial atenção às dimensões com avaliação abaixo de 55%. O envolvimento da alta direção será determinante para o sucesso das iniciativas.
+    ${companyData.iso === 'Em processo de certificação' ? '<br><br>Com o processo de certificação ISO 9001 em andamento, este diagnóstico pode ser utilizado como referência para priorizar as lacunas a serem endereçadas antes da auditoria de certificação.' : ''}
+    ${companyData.iso === 'Não, mas pretendemos' && globalPct >= 55 ? '<br><br>O nível de maturidade atual cria uma base favorável para iniciar o processo de certificação ISO 9001. Recomenda-se a realização de um gap analysis formal como próximo passo.' : ''}
+  `;
+
+  document.getElementById('conclusion-text').innerHTML = text;
+}
+
+function restart() {
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  companyData = {};
+  show('landing');
+  window.scrollTo(0,0);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════
+// PDF EXPORT — iOS/iPhone compatible
+// ═══════════════════════════════════════════════════
+
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+async function exportPDF() {
+  const btn = document.getElementById('btn-pdf');
+  const overlay = document.getElementById('pdf-overlay');
+  const labelEl = document.getElementById('pdf-label');
+  const tip = document.getElementById('ios-tip');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Gerando PDF…';
+  overlay.classList.add('visible');
+  labelEl.textContent = 'Preparando relatório…';
+  await new Promise(r => setTimeout(r, 80));
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+    const pageW = pdf.internal.pageSize.getWidth();   // 210mm
+    const pageH = pdf.internal.pageSize.getHeight();  // 297mm
+    const margin = 12; // mm padding top/bottom per page
+    const usableH = pageH - margin * 2;
+    const scale = isIOS() ? 1.5 : 2;
+
+    // Helper: capture a DOM element → add to PDF, paginating if tall
+    async function addSection(el, label, isFirst) {
+      labelEl.textContent = `Capturando: ${label}…`;
+      await new Promise(r => setTimeout(r, 30));
+
+      const canvas = await html2canvas(el, {
+        scale,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#f8f5ef',
+        logging: false,
+        onclone: (doc) => {
+          // Make the cloned element fully visible
+          const clone = doc.getElementById(el.id) || doc.querySelector('.' + [...el.classList].join('.'));
+          if (clone) { clone.style.display = 'block'; clone.style.opacity = '1'; }
+        }
+      });
+
+      const imgW = pageW;                                         // full width
+      const imgH = (canvas.height * imgW) / canvas.width;        // proportional height in mm
+      const sliceHeightPx = Math.floor((usableH * canvas.width) / imgW);
+      const numSlices = Math.ceil(canvas.height / sliceHeightPx);
+
+      for (let i = 0; i < numSlices; i++) {
+        if (!isFirst || i > 0) pdf.addPage();
+        isFirst = false;
+
+        const srcY  = i * sliceHeightPx;
+        const srcH  = Math.min(sliceHeightPx, canvas.height - srcY);
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width  = canvas.width;
+        sliceCanvas.height = srcH;
+        sliceCanvas.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+
+        const sliceMmH = (srcH * imgW) / canvas.width;
+        pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.93), 'JPEG', 0, margin, imgW, sliceMmH, '', 'FAST');
+      }
+      return false; // isFirst is now false for subsequent calls
+    }
+
+    // ── Identify the PDF sections ──────────────────────────────────────
+    // Each section gets its own page(s). We capture section elements individually.
+
+    const reportEl = document.getElementById('report');
+
+    // Temporarily hide action buttons & overlay from capture
+    const actionsEl  = document.querySelector('.report-actions');
+    const iosTipEl   = document.getElementById('ios-tip');
+    const overlayEl  = document.getElementById('pdf-overlay');
+    [actionsEl, iosTipEl].forEach(e => { if (e) e.style.visibility = 'hidden'; });
+
+    // Section 1: Cover (report-cover)
+    let isFirst = true;
+    const cover = reportEl.querySelector('.report-cover');
+    if (cover) isFirst = await addSection(cover, 'Capa', isFirst);
+
+    // Section 2: Radar + Dimension bars (first part of report-body)
+    const radarSection = document.createElement('div');
+    radarSection.id = '__pdf-radar';
+    radarSection.style.background = '#f8f5ef';
+    radarSection.style.padding = '32px 24px';
+    radarSection.style.maxWidth = '800px';
+    // Clone radar header + radar SVG + dim-grid
+    const radarHeader = reportEl.querySelector('.report-body .section-header');
+    const radarWrap   = reportEl.querySelector('.radar-wrap');
+    const dimHeader   = reportEl.querySelectorAll('.report-body .section-header')[1];
+    const dimGrid     = reportEl.querySelector('#dim-grid');
+    [radarHeader, radarWrap, dimHeader, dimGrid].forEach(n => {
+      if (n) radarSection.appendChild(n.cloneNode(true));
+    });
+    document.body.appendChild(radarSection);
+    isFirst = await addSection(radarSection, 'Visão por Dimensão', isFirst);
+    document.body.removeChild(radarSection);
+
+    // Section 3: Findings
+    const findSection = document.createElement('div');
+    findSection.style.background = '#f8f5ef';
+    findSection.style.padding = '32px 24px';
+    findSection.style.maxWidth = '800px';
+    const findHeader = reportEl.querySelectorAll('.report-body .section-header')[2];
+    const findGrid   = reportEl.querySelector('#findings-grid');
+    [findHeader, findGrid].forEach(n => { if (n) findSection.appendChild(n.cloneNode(true)); });
+    document.body.appendChild(findSection);
+    isFirst = await addSection(findSection, 'Principais Achados', isFirst);
+    document.body.removeChild(findSection);
+
+    // Section 4: Recommendations
+    const recSection = document.createElement('div');
+    recSection.style.background = '#f8f5ef';
+    recSection.style.padding = '32px 24px';
+    recSection.style.maxWidth = '800px';
+    const recHeader = reportEl.querySelectorAll('.report-body .section-header')[3];
+    const recList   = reportEl.querySelector('#rec-list');
+    [recHeader, recList].forEach(n => { if (n) recSection.appendChild(n.cloneNode(true)); });
+    document.body.appendChild(recSection);
+    isFirst = await addSection(recSection, 'Plano de Ação', isFirst);
+    document.body.removeChild(recSection);
+
+    // Section 5: Conclusion
+    const conclSection = document.createElement('div');
+    conclSection.style.background = '#f8f5ef';
+    conclSection.style.padding = '32px 24px';
+    conclSection.style.maxWidth = '800px';
+    const conclHeader = reportEl.querySelectorAll('.report-body .section-header')[4];
+    const conclText   = reportEl.querySelector('#conclusion-text');
+    [conclHeader, conclText].forEach(n => { if (n) conclSection.appendChild(n.cloneNode(true)); });
+    document.body.appendChild(conclSection);
+    await addSection(conclSection, 'Conclusão', isFirst);
+    document.body.removeChild(conclSection);
+
+    // Restore hidden elements
+    [actionsEl, iosTipEl].forEach(e => { if (e) e.style.visibility = ''; });
+
+    labelEl.textContent = 'Salvando arquivo…';
+    await new Promise(r => setTimeout(r, 40));
+
+    const fileName = `Diagnostico_Qualidade_${(companyData.company || 'Empresa').replace(/\s+/g,'_')}.pdf`;
+
+    if (isIOS()) {
+      const pdfBlob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = blobUrl; a.download = fileName; a.target = '_blank';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => window.open(blobUrl, '_blank'), 300);
+      tip.style.display = 'block';
+    } else {
+      pdf.save(fileName);
+    }
+
+    overlay.classList.remove('visible');
+    btn.disabled = false;
+    btn.textContent = '✅ PDF Gerado!';
+    setTimeout(() => { btn.textContent = '📄 Gerar PDF do Diagnóstico'; }, 3500);
+    showToast(isIOS() ? 'PDF aberto! Use "Compartilhar" para salvar.' : 'PDF salvo com sucesso!');
+
+  } catch (err) {
+    console.error('PDF error:', err);
+    overlay.classList.remove('visible');
+    btn.disabled = false;
+    btn.textContent = '📄 Gerar PDF do Diagnóstico';
+    showToast('Abrindo impressão como alternativa…');
+    setTimeout(() => window.print(), 400);
+  }
+}
+</script>
+</body>
+</html>
