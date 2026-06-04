@@ -36,6 +36,206 @@
   /* Seções ocultas por padrão — controladas pelo JS */
   #company-form, #quiz, #report { display: none; }
 
+  /* ─── VALUE PROPS ─── */
+  .value-props {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 56px;
+    width: 100%;
+  }
+  .vprop {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 24px 20px;
+    text-align: left;
+  }
+  .vprop-icon { font-size: 26px; margin-bottom: 12px; }
+  .vprop-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--paper);
+    margin-bottom: 8px;
+  }
+  .vprop-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(248,245,239,0.5);
+  }
+
+  /* ─── SOCIAL PROOF ─── */
+  .social-proof {
+    margin-top: 40px;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 28px 32px;
+    background: rgba(200,150,62,0.07);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    text-align: left;
+  }
+  .sp-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-style: italic;
+    line-height: 1.5;
+    color: rgba(248,245,239,0.85);
+    margin-bottom: 12px;
+  }
+  .sp-author {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: rgba(248,245,239,0.45);
+  }
+
+  @media (max-width: 640px) {
+    .value-props { grid-template-columns: 1fr; gap: 12px; }
+    .social-proof { padding: 22px 24px; }
+    .sp-quote { font-size: 15px; }
+  }
+
+  /* ─── SHARE BUTTONS ─── */
+  .share-block {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin: 0 24px 32px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+  .share-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .share-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .share-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    color: #fff;
+    transition: transform 0.15s, opacity 0.15s;
+    text-decoration: none;
+  }
+  .share-btn:hover { transform: translateY(-2px); opacity: 0.92; }
+  .share-wa  { background: #25D366; }
+  .share-li  { background: #0A66C2; }
+  .share-fb  { background: #1877F2; }
+  .share-tg  { background: #229ED9; }
+  .share-copy { background: var(--ink); }
+
+  /* ─── BENCHMARK ─── */
+  .bench-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  .bench-row {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+  .bench-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .bench-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .bench-verdict {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 3px;
+  }
+  .bench-above { background: #e8f5f0; color: #2e7d6b; }
+  .bench-below { background: #fde8dc; color: #8a3820; }
+  .bench-equal { background: #fdf3e0; color: #8a6020; }
+  .bench-track {
+    position: relative;
+    height: 28px;
+    background: var(--cream);
+    border-radius: 4px;
+    overflow: visible;
+  }
+  .bench-you {
+    position: absolute;
+    top: 0;
+    height: 28px;
+    background: linear-gradient(90deg, var(--sage), var(--sage-light));
+    border-radius: 4px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1) 0.4s;
+    width: 0%;
+  }
+  .bench-avg-marker {
+    position: absolute;
+    top: -4px;
+    height: 36px;
+    width: 2px;
+    background: var(--rust);
+    z-index: 2;
+  }
+  .bench-avg-marker::after {
+    content: 'média setor';
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: var(--rust);
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .bench-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .bench-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .bench-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .bench-note {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+    text-align: center;
+    margin-top: 4px;
+  }
+
   /* ─── LANDING ─── */
   #landing {
     min-height: 100vh;
@@ -1279,6 +1479,31 @@
       <div class="stat"><span class="stat-num">~12</span><span class="stat-lbl">Minutos</span></div>
       <div class="stat"><span class="stat-num">100%</span><span class="stat-lbl">Gratuito</span></div>
     </div>
+
+    <!-- Proposta de valor -->
+    <div class="value-props">
+      <div class="vprop">
+        <div class="vprop-icon">📊</div>
+        <div class="vprop-title">Resultado personalizado</div>
+        <div class="vprop-text">Relatório com pontuação, radar de maturidade e plano de ação sob medida para sua empresa.</div>
+      </div>
+      <div class="vprop">
+        <div class="vprop-icon">⚖️</div>
+        <div class="vprop-title">Compare-se ao mercado</div>
+        <div class="vprop-text">Veja onde sua empresa está em relação à média do seu setor em cada dimensão.</div>
+      </div>
+      <div class="vprop">
+        <div class="vprop-icon">📄</div>
+        <div class="vprop-title">PDF para compartilhar</div>
+        <div class="vprop-text">Baixe um relatório profissional pronto para apresentar à diretoria.</div>
+      </div>
+    </div>
+
+    <!-- Prova social -->
+    <div class="social-proof">
+      <div class="sp-quote">"Em 12 minutos tivemos um raio-x preciso de onde priorizar nossos esforços de qualidade. Material que valeria uma consultoria."</div>
+      <div class="sp-author">— Diagnóstico aplicado em empresas de manufatura, serviços e tecnologia</div>
+    </div>
   </div>
 </section>
 
@@ -1427,6 +1652,24 @@
 
     <div class="section-divider"></div>
 
+    <!-- Benchmark -->
+    <div class="section-header">
+      <div class="section-icon">⚖️</div>
+      <div>
+        <div class="section-title-h">Comparativo com o Setor</div>
+        <div class="section-title-sub">Sua empresa frente à média do segmento</div>
+      </div>
+    </div>
+
+    <div class="bench-legend">
+      <span><span class="bench-dot" style="background:var(--sage)"></span> Sua empresa</span>
+      <span><span class="bench-dot" style="background:var(--rust);width:3px;height:14px;border-radius:1px"></span> Média do setor</span>
+    </div>
+    <div class="bench-grid" id="bench-grid"></div>
+    <div class="bench-note" id="bench-note"></div>
+
+    <div class="section-divider"></div>
+
     <!-- Findings -->
     <div class="section-header">
       <div class="section-icon">🔍</div>
@@ -1470,6 +1713,12 @@
     📱 <strong>iPhone/iPad:</strong> O PDF foi gerado e o download iniciou automaticamente. Se não abrir, toque em <strong>"Abrir em…"</strong> ou verifique sua pasta de <strong>Downloads</strong> no app Arquivos.
   </div>
 
+  <div class="share-block">
+    <div class="share-title">📣 Compartilhe esta ferramenta</div>
+    <div class="share-sub">Indique o diagnóstico gratuito para colegas e parceiros</div>
+    <div class="share-btns" id="share-btns"></div>
+  </div>
+
   <div class="report-actions">
     <button class="action-btn primary" id="btn-pdf" onclick="exportPDF()">📄 Gerar PDF do Diagnóstico</button>
     <button class="action-btn secondary" onclick="restart()">↩ Novo Diagnóstico</button>
@@ -1499,6 +1748,15 @@ const DIMENSIONS = [
   { id: 'cliente',       name: 'Foco no Cliente',             icon: '🤝', color: '#2e7d6b' },
   { id: 'documentacao',  name: 'Documentação & Controle',     icon: '📁', color: '#8a4f2e' },
 ];
+
+// ── BENCHMARK: valores de REFERÊNCIA inicial por dimensão ──
+// IMPORTANTE: estes números são uma referência de mercado plausível,
+// não uma média estatística real. Servem enquanto a base de dados é pequena.
+// A média real (calculada a partir da sua planilha) pode substituí-los no futuro.
+const BENCHMARK_REF = {
+  lideranca: 58, planejamento: 52, processos: 55, pessoas: 50,
+  monitoramento: 48, cliente: 60, documentacao: 53,
+};
 
 const QUESTIONS = [
   // LIDERANÇA (0-3)
@@ -2038,6 +2296,12 @@ function buildReport() {
 
   // Conclusion
   buildConclusion(dimResults, globalPct, maturity);
+
+  // Benchmark vs setor
+  buildBenchmark(dimResults, globalPct);
+
+  // Botões de compartilhamento
+  buildShareButtons(globalPct, maturity);
 }
 
 function getMaturity(pct) {
@@ -2248,6 +2512,92 @@ function buildConclusion(dimResults, globalPct, maturity) {
   document.getElementById('conclusion-text').innerHTML = text;
 }
 
+// ═══════════════════════════════════════════════════
+// BENCHMARK — sua empresa vs. média do setor
+// ═══════════════════════════════════════════════════
+
+function buildBenchmark(dimResults, globalPct) {
+  const grid = document.getElementById('bench-grid');
+
+  const rows = dimResults.map(d => {
+    const avg  = BENCHMARK_REF[d.id] || 50;
+    const diff = d.pct - avg;
+    let cls = 'bench-equal', verdict = 'Na média';
+    if (diff >= 6)  { cls = 'bench-above'; verdict = `+${diff} pts acima`; }
+    if (diff <= -6) { cls = 'bench-below'; verdict = `${diff} pts abaixo`; }
+    return `
+      <div class="bench-row">
+        <div class="bench-head">
+          <span class="bench-name">${d.icon} ${d.name}</span>
+          <span class="bench-verdict ${cls}">${verdict}</span>
+        </div>
+        <div class="bench-track">
+          <div class="bench-you" data-target="${d.pct}"></div>
+          <div class="bench-avg-marker" style="left:${avg}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  grid.innerHTML = rows;
+
+  // animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.bench-you').forEach(el => {
+      el.style.width = el.dataset.target + '%';
+    });
+  }, 200);
+
+  const globalAvg = Math.round(Object.values(BENCHMARK_REF).reduce((a,b)=>a+b,0) / Object.keys(BENCHMARK_REF).length);
+  const note = document.getElementById('bench-note');
+  const gd = globalPct - globalAvg;
+  note.textContent = `Sua maturidade global (${globalPct}%) está ${gd >= 0 ? gd + ' pontos acima' : Math.abs(gd) + ' pontos abaixo'} da referência de mercado (${globalAvg}%). Valores de referência baseados em faixas típicas de maturidade ISO 9001; serão ajustados conforme a base de diagnósticos cresce.`;
+}
+
+// ═══════════════════════════════════════════════════
+// COMPARTILHAMENTO — WhatsApp, LinkedIn, etc.
+// ═══════════════════════════════════════════════════
+
+function getShareURL() {
+  return localStorage.getItem('qdiag_public_url') || (window.location.origin + window.location.pathname);
+}
+
+function buildShareButtons(globalPct, maturity) {
+  const url = getShareURL();
+  const msg = `Avaliei a maturidade em Gestão da Qualidade da minha empresa (resultado: ${maturity.label} - ${globalPct}%). Faça também este diagnóstico gratuito:`;
+  const eu  = encodeURIComponent(url);
+  const em  = encodeURIComponent(msg);
+  const emTitle = encodeURIComponent('Diagnóstico de Gestão da Qualidade');
+
+  const btns = [
+    { cls: 'share-wa',  icon: '💬', label: 'WhatsApp', href: `https://wa.me/?text=${em}%20${eu}` },
+    { cls: 'share-li',  icon: '💼', label: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${eu}` },
+    { cls: 'share-fb',  icon: '👍', label: 'Facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${eu}` },
+    { cls: 'share-tg',  icon: '✈️', label: 'Telegram', href: `https://t.me/share/url?url=${eu}&text=${em}` },
+  ];
+
+  const html = btns.map(b =>
+    `<a class="share-btn ${b.cls}" href="${b.href}" target="_blank" rel="noopener">${b.icon} ${b.label}</a>`
+  ).join('') +
+    `<button class="share-btn share-copy" onclick="copyShareLink()">🔗 Copiar link</button>`;
+
+  document.getElementById('share-btns').innerHTML = html;
+}
+
+function copyShareLink() {
+  const url = getShareURL();
+  navigator.clipboard?.writeText(url).then(
+    () => showToast('Link copiado! ✓'),
+    () => {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = url; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); showToast('Link copiado! ✓'); }
+      catch(e) { showToast('Copie manualmente: ' + url); }
+      document.body.removeChild(ta);
+    }
+  );
+}
+
 function restart() {
   current = 0;
   answers = new Array(QUESTIONS.length).fill(null);
@@ -2348,59 +2698,55 @@ async function exportPDF() {
     const cover = reportEl.querySelector('.report-cover');
     if (cover) isFirst = await addSection(cover, 'Capa', isFirst);
 
-    // Section 2: Radar + Dimension bars (first part of report-body)
-    const radarSection = document.createElement('div');
-    radarSection.id = '__pdf-radar';
-    radarSection.style.background = '#f8f5ef';
-    radarSection.style.padding = '32px 24px';
-    radarSection.style.maxWidth = '800px';
-    // Clone radar header + radar SVG + dim-grid
-    const radarHeader = reportEl.querySelector('.report-body .section-header');
-    const radarWrap   = reportEl.querySelector('.radar-wrap');
-    const dimHeader   = reportEl.querySelectorAll('.report-body .section-header')[1];
-    const dimGrid     = reportEl.querySelector('#dim-grid');
-    [radarHeader, radarWrap, dimHeader, dimGrid].forEach(n => {
-      if (n) radarSection.appendChild(n.cloneNode(true));
-    });
-    document.body.appendChild(radarSection);
-    isFirst = await addSection(radarSection, 'Visão por Dimensão', isFirst);
-    document.body.removeChild(radarSection);
+    // Helper: build a section wrapper from a header + content nodes
+    function makeSection(headerText, contentNodes) {
+      const wrap = document.createElement('div');
+      wrap.style.background = '#f8f5ef';
+      wrap.style.padding = '32px 24px';
+      wrap.style.maxWidth = '800px';
+      // find the matching section-header by its title text
+      const headers = [...reportEl.querySelectorAll('.report-body .section-header')];
+      const header = headers.find(h => h.textContent.includes(headerText));
+      if (header) wrap.appendChild(header.cloneNode(true));
+      contentNodes.forEach(sel => {
+        let n;
+        if (typeof sel === 'string') n = reportEl.querySelector(sel);
+        else if (typeof sel === 'function') n = sel();
+        else n = sel;
+        if (n) wrap.appendChild(n.cloneNode(true));
+      });
+      return wrap;
+    }
 
-    // Section 3: Findings
-    const findSection = document.createElement('div');
-    findSection.style.background = '#f8f5ef';
-    findSection.style.padding = '32px 24px';
-    findSection.style.maxWidth = '800px';
-    const findHeader = reportEl.querySelectorAll('.report-body .section-header')[2];
-    const findGrid   = reportEl.querySelector('#findings-grid');
-    [findHeader, findGrid].forEach(n => { if (n) findSection.appendChild(n.cloneNode(true)); });
-    document.body.appendChild(findSection);
-    isFirst = await addSection(findSection, 'Principais Achados', isFirst);
-    document.body.removeChild(findSection);
+    async function renderSection(headerText, contentSelectors, label) {
+      const sec = makeSection(headerText, contentSelectors);
+      document.body.appendChild(sec);
+      const result = await addSection(sec, label, isFirst);
+      document.body.removeChild(sec);
+      return result;
+    }
 
-    // Section 4: Recommendations
-    const recSection = document.createElement('div');
-    recSection.style.background = '#f8f5ef';
-    recSection.style.padding = '32px 24px';
-    recSection.style.maxWidth = '800px';
-    const recHeader = reportEl.querySelectorAll('.report-body .section-header')[3];
-    const recList   = reportEl.querySelector('#rec-list');
-    [recHeader, recList].forEach(n => { if (n) recSection.appendChild(n.cloneNode(true)); });
-    document.body.appendChild(recSection);
-    isFirst = await addSection(recSection, 'Plano de Ação', isFirst);
-    document.body.removeChild(recSection);
+    // Section 2: Radar + Dimension bars
+    isFirst = await renderSection('Visão por Dimensão',
+      ['.radar-wrap', () => [...reportEl.querySelectorAll('.report-body .section-header')].find(h=>h.textContent.includes('Pontuação')), '#dim-grid'],
+      'Visão por Dimensão');
 
-    // Section 5: Conclusion
-    const conclSection = document.createElement('div');
-    conclSection.style.background = '#f8f5ef';
-    conclSection.style.padding = '32px 24px';
-    conclSection.style.maxWidth = '800px';
-    const conclHeader = reportEl.querySelectorAll('.report-body .section-header')[4];
-    const conclText   = reportEl.querySelector('#conclusion-text');
-    [conclHeader, conclText].forEach(n => { if (n) conclSection.appendChild(n.cloneNode(true)); });
-    document.body.appendChild(conclSection);
-    await addSection(conclSection, 'Conclusão', isFirst);
-    document.body.removeChild(conclSection);
+    // Section 3: Benchmark
+    isFirst = await renderSection('Comparativo com o Setor',
+      ['.bench-legend', '#bench-grid', '#bench-note'],
+      'Comparativo com o Setor');
+
+    // Section 4: Findings
+    isFirst = await renderSection('Principais Achados',
+      ['#findings-grid'], 'Principais Achados');
+
+    // Section 5: Recommendations
+    isFirst = await renderSection('Plano de Ação',
+      ['#rec-list'], 'Plano de Ação');
+
+    // Section 6: Conclusion
+    await renderSection('Conclusão',
+      ['#conclusion-text'], 'Conclusão');
 
     // Restore hidden elements
     [actionsEl, iosTipEl].forEach(e => { if (e) e.style.visibility = ''; });
